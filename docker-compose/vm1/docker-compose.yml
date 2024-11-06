@@ -1,0 +1,34 @@
+version: '3.3'
+
+services:
+  portainer-service:
+    image: portainer/portainer-ce:latest
+    container_name: portainer-instance
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "8000:8000"
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+      - portainer-storage:/data
+
+  docker-registry:
+    image: registry:2.7
+    container_name: docker_registry
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/data
+      - REGISTRY_AUTH=htpasswd
+      - REGISTRY_AUTH_HTPASSWD_REALM="Docker Registry"
+      - REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd
+    volumes:
+      - registry-volume:/data
+      - ./auth:/auth
+
+volumes:
+  portainer-storage:
+  registry-volume:
